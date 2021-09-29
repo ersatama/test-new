@@ -1,0 +1,159 @@
+.title {
+    font-size: 7px;
+    margin-top: 2px;
+    color: #00a082;
+}
+.footer {
+    &-menu {
+        &-main {
+            padding: 30px 0 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+            background: #fff;
+            border-radius: 10px;
+        }
+        &-icon {
+            background: url('/img/logo/bell-green.png') no-repeat center;
+            width: 30px;
+            height: 30px;
+        }
+        &-title {
+            font-size: 10px;
+            text-align: center;
+            color: #57a283;
+        }
+        &-notifications {
+            position: absolute;
+            bottom: 80px;
+            background: #fff;
+            left: 0;
+            right: 0;
+            border-radius: 10px;
+            box-shadow: 0 0 3px 1px rgba(0, 0, 0,.1);
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.2s ease;
+            &-show {
+                visibility: visible;
+                opacity: 1;
+                bottom: 70px;
+            }
+            &:before {
+                content: '';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                background: #fff;
+                transform: translate(-50%, 0) rotate(
+                        45deg
+                );
+                left: 50%;
+                bottom: -8px;
+                box-shadow: 0 0 3px 1px rgba(0, 0, 0, .1);
+            }
+            &-item {
+                padding: 7px 15px 7px 15px;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                cursor: pointer;
+                &:hover {
+                    background: #e6f1ec;
+                }
+                &:first-child {
+                    padding-top: 15px;
+                }
+                &:last-child {
+                    padding-bottom: 15px;
+                }
+                &:only-child {
+                    padding: 15px;
+                }
+                &-icon {
+                    width: 40px;
+                    height: 40px;
+                    background: #e6f1ec no-repeat center;
+                    background-size: cover;
+                    border-radius: 40px;
+                }
+                &-arr {
+                    width: 15px;
+                    height: 15px;
+                    background: url('/img/logo/right-arrow.svg') no-repeat center;
+                    background-size: contain;
+                    border-radius: 50px;
+                    margin: 0 0 0 auto;
+                }
+                &-detail {
+                    text-align: left;
+                    max-width: 240px;
+                    &-title {
+                        font-weight: bold;
+                        color: #000;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        & > span {
+                            color: grey;
+                        }
+                    }
+                    &-description {
+                        color: grey;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        overflow: hidden;
+                    }
+                }
+            }
+            &-list {
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                z-index: 2;
+                background: #fff;
+                overflow: hidden;
+                border-radius: 10px;
+                max-height: 400px;
+            }
+        }
+
+    }
+    &-fixed {
+        box-shadow: 0 0 5px 1px rgba(0,0,0,.1);
+        position: fixed;
+        right: 10px;
+        bottom: 30px;
+        left: 10px;
+        z-index: 1030;
+        margin: 0;
+        border-radius: 50px;
+        &-main {
+            padding: 0 8px 0 8px;
+        }
+    }
+    &-img {
+        width: 18px;
+        height: 18px;
+    }
+    &-icon {
+        width: 20%;
+        & > button {
+            padding: 3px 0 3px 0;
+            margin: 3px 0 3px 0;
+        }
+        &-center {
+            background: #e6f1ec;
+            border-radius: 25px;
+            &-notify {
+                & > .title {
+                    color: #FF8008 !important;
+                }
+            }
+        }
+    }
+}

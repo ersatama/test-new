@@ -2,7 +2,7 @@
     <div class="container d-md-none">
         <div class="row bg-white width-auto footer-fixed d-flex justify-content-center">
             <div class="col-12 col-md-4 p-0">
-                <div class="footer-fixed-main w-100">
+                <div class="footer-fixed-main w-100 d-flex">
                     <router-link :to="'/home'" class="footer-icon p-0 py-1">
                         <button class="btn font-weight-bold w-100" :class="{'footer-icon-center':(this.url==='home')}">
                             <img src="/img/logo/home.svg" class="footer-img" alt="home">
@@ -15,8 +15,8 @@
                             <div class="title">Новости</div>
                         </button>
                     </router-link>
-                    <a class="footer-icon p-0 py-1" v-if="storage.token"  @click="view(1)">
-                        <button class="btn font-weight-bold w-100" :class="{'footer-icon-center-notify': (storage.sidebar.notifications > 0)}" @mouseup="show = !show" @mousedown.stop>
+                    <a class="footer-icon p-0 py-1" v-if="$store.state.localStorage.token"  @click="view(1)">
+                        <button class="btn font-weight-bold w-100" :class="{'footer-icon-center-notify': ($store.state.localStorage.sidebar.notifications > 0)}" @mouseup="show = !show" @mousedown.stop>
                             <img src="/img/logo/notification.svg" class="footer-img" v-if="data.length > 0">
                             <img src="/img/logo/bell.svg" class="footer-img" v-else>
                             <div class="title">Уведомления</div>
@@ -52,7 +52,7 @@
                             <div class="title">Избранное</div>
                         </button>
                     </router-link>
-                    <router-link :to="'/profile'" class="footer-icon p-0 py-1" v-if="storage.token">
+                    <router-link :to="'/profile'" class="footer-icon p-0 py-1" v-if="$store.state.localStorage.token">
                         <button class="btn font-weight-bold w-100" :class="{'footer-icon-center':(this.url==='profile')}">
                             <img src="/img/logo/profile.svg" class="footer-img">
                             <div class="title">Профиль</div>
@@ -83,10 +83,14 @@ export default {
     },
     created() {
         this.setEnd();
-        window.addEventListener('mousedown',this.hide);
+        if (process.browser) {
+            window.addEventListener('mousedown',this.hide);
+        }
     },
     destroyed: function() {
-        window.removeEventListener('mousemove', this.hide);
+        if (process.browser) {
+            window.removeEventListener('mousemove', this.hide);
+        }
     },
     methods: {
         hide: function() {
@@ -96,18 +100,20 @@ export default {
             this.$emit('setComment',key);
         },
         view: function(index) {
-            this.storage.sidebar.view   =   index;
-            this.storage.sidebar.show   =   true;
+            this.$store.state.localStorage.sidebar.view   =   index;
+            this.$store.state.localStorage.sidebar.show   =   true;
         },
         setEnd: function() {
-            let path    =   window.location.pathname.split('/');
-            this.url    =   path[ path.length - 1 ];
-            let length  =   path.length;
-            for (let i = 0; i < length; i++) {
+            if (process.browser) {
+              let path    =   window.location.pathname.split('/');
+              this.url    =   path[ path.length - 1 ];
+              let length  =   path.length;
+              for (let i = 0; i < length; i++) {
                 if (path[i].trim() !== '') {
-                    this.end    =   path[i];
-                    break;
+                  this.end    =   path[i];
+                  break;
                 }
+              }
             }
         },
     }
@@ -115,5 +121,5 @@ export default {
 </script>
 
 <style lang="scss">
-    @import '../../../css/footerMenu/footerMenu.scss';
+    @import '../../assets/footerMenu/footerMenu.scss';
 </style>

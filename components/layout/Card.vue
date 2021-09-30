@@ -10,7 +10,7 @@
                 <img :src="organization.image" width="60">
             </div>
             <div class="result-body-item-favorite" @click="favorite(organization.id)">
-                <div :class="{'result-body-item-favorite-sel': storage.favorite.includes(organization.id)}"></div>
+                <div :class="{'result-body-item-favorite-sel': $store.state.localStorage.favorite.includes(organization.id)}"></div>
             </div>
             <template v-if="user">
                 <div class="result-body-item-subscribe" v-if="subscribe && subscribe.status === 'on'" @click="subscribeNow()">
@@ -57,6 +57,7 @@ export default {
     name: "Card",
     data() {
         return {
+            url: 'https://reserved-app.kz',
             subscribe: false,
             user: false
         }
@@ -67,7 +68,7 @@ export default {
     methods: {
         subscribeNow: function() {
             if (!this.subscribe) {
-                axios.post('/api/newsSubscribe/create',{
+                this.$axios.post(this.url+'/api/newsSubscribe/create',{
                     organization_id: this.organization.id,
                     user_id: this.user.id
                 }).then(response => {
@@ -75,14 +76,14 @@ export default {
                 });
             } else if (this.subscribe.status === 'on') {
                 this.subscribe.status   =   'off';
-                axios.post('/api/newsSubscribe/update/'+this.subscribe.id,{
+                this.$axios.post(this.url+'/api/newsSubscribe/update/'+this.subscribe.id,{
                     organization_id: this.organization.id,
                     user_id: this.user.id,
                     status: 'off'
                 });
             } else {
                 this.subscribe.status   =   'on';
-                axios.post('/api/newsSubscribe/update/'+this.subscribe.id,{
+                this.$axios.post(this.url+'/api/newsSubscribe/update/'+this.subscribe.id,{
                     organization_id: this.organization.id,
                     user_id: this.user.id,
                     status: 'on'
@@ -90,19 +91,19 @@ export default {
             }
         },
         setUser: async function () {
-            if (this.storage.token) {
-                let user    =   JSON.parse(sessionStorage.getItem('user'));
+            if (this.$store.state.localStorage.token) {
+                let user    =   this.$store.state.sessionStorage.user;
                 if (user) {
                     this.status = true;
                     this.user = user;
                 } else {
-                    await axios.get('/api/token/' + this.storage.token)
+                    await this.$axios.get(this.url+'/api/token/' + this.$store.state.localStorage.token)
                         .then(response => {
                             let data = response.data;
                             if (data.hasOwnProperty('data')) {
-                                sessionStorage.user = JSON.stringify(data.data);
+                                this.$store.commit('sessionStorage/setUser',data.data);
                                 this.status = true;
-                                this.user = JSON.parse(sessionStorage.user);
+                                this.user = this.$store.state.sessionStorage.user;
                             }
                         }).catch(error => {
                             this.status = false;
@@ -112,21 +113,20 @@ export default {
             }
         },
         favorite: function(id) {
-            let len =   this.storage.favorite.length;
             let status  =   true;
-            for (let i = 0; i < len; i++) {
-                if (this.storage.favorite[i] === id) {
-                    this.storage.favorite.splice(i,1);
+            for (let i = 0; i < this.$store.state.localStorage.favorite.length; i++) {
+                if (this.$store.state.localStorage.favorite[i] === id) {
+                    this.$store.commit('localStorage/spliceFavorite',i);
                     status  =   false;
                 }
             }
             if (status) {
-                this.storage.favorite.push(id);
+                this.$store.commit('localStorage/addFavorite',id);
             }
         },
         getSubscribe: function() {
             if (this.user) {
-                axios.get('/api/newsSubscribe/getByOrganizationIdAndUserId/'+this.organization.id+'/'+this.user.id)
+                this.$axios.get(this.url+'/api/newsSubscribe/getByOrganizationIdAndUserId/'+this.organization.id+'/'+this.user.id)
                     .then(response => {
                         this.subscribe  =   response.data.data;
                     }).catch(error => {

@@ -94,10 +94,10 @@
 
 <script>
 export default {
-    props: ['filter'],
-    name: "Filter",
+    name: "Filter-block",
     data() {
         return {
+            url: 'https://reserved-app.kz',
             price: false,
             prices: [
                 {min:{status:false,sum:0},max:{status:true,sum:1500},checked:false},
@@ -148,7 +148,11 @@ export default {
             this.setFilter();
         },
         getFilter: function() {
-            axios.get('/api/organization/filter').then(response => {
+            this.$axios.get(this.url+'/api/organization/filter',{
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }).then(response => {
                 let filter  =   response.data;
                 this.tags   =   filter.tags_id;
                 this.others =   filter.tags_option_id;

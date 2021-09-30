@@ -26,5 +26,5 @@ export default {
 </script>
 
 <style lang="scss">
-
+  @import "../../assets/components/loading.scss";
 </style>

@@ -146,12 +146,16 @@ export default {
         }
     },
     async created() {
-        await this.auth();
-        await this.getCountry();
-        this.getBookings();
+        if (process.browser) {
+          await this.auth();
+          await this.getCountry();
+          this.getBookings();
+        }
     },
     mounted() {
-        this.setSocketBookingCompleted();
+        if (process.browser) {
+          this.setSocketBookingCompleted();
+        }
     },
     methods: {
         setSocketBookingCompleted: function() {

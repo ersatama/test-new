@@ -68,5 +68,5 @@ export default {
 </script>
 
 <style lang="scss">
-    @import '../../../css/footer/footer.scss';
+    @import './assets/footer/footer.scss';
 </style>

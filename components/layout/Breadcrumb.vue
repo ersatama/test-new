@@ -1,35 +1,37 @@
 <template>
-    <location :countries="countries"></location>
-    <div class="container-fluid section-bg breadcrumb-main">
+    <div>
+      <location :countries="countries"></location>
+      <div class="container-fluid section-bg breadcrumb-main">
         <div class="container py-0">
-            <div class="row">
-                <div class="col-12 col-md-9 p-0 d-flex align-items-center">
-                    <ul class="breadcrumb">
-                        <li>
-                            <a href="/">
-                                <div class="breadcrumb-home"></div>
-                            </a>
-                        </li>
-                        <template v-for="(item,key) in breadcrumb" :key="key">
-                            <li>
-                                <div class="breadcrumb-arrow"></div>
-                            </li>
-                            <li class="breadcrumb-link">
-                                <a :href="'/'+item.link" v-if="item.link">{{item.title}}</a>
-                                <a v-else>{{item.title}}</a>
-                            </li>
-                        </template>
-                    </ul>
-                </div>
-                <div class="location-main col-md-3 p-0 d-flex justify-content-end">
-                    <div class="location" id="location" ref="location" data-toggle="modal" data-target="#location">
-                        <div class="location-title" v-if="storage.city">{{storage.city.title}}</div>
-                        <div class="location-title" v-else>Не выбрано</div>
-                        <div class="location-icon"></div>
-                    </div>
-                </div>
+          <div class="row">
+            <div class="col-12 col-md-9 p-0 d-flex align-items-center">
+              <ul class="breadcrumb">
+                <li>
+                  <a href="/">
+                    <div class="breadcrumb-home"></div>
+                  </a>
+                </li>
+                <template v-for="(item,key) in breadcrumb">
+                  <li>
+                    <div class="breadcrumb-arrow"></div>
+                  </li>
+                  <li class="breadcrumb-link" :key="key">
+                    <a :href="'/'+item.link" v-if="item.link">{{item.title}}</a>
+                    <a v-else>{{item.title}}</a>
+                  </li>
+                </template>
+              </ul>
             </div>
+            <div class="location-main col-md-3 p-0 d-flex justify-content-end">
+              <div class="location" id="location" ref="location" data-toggle="modal" data-target="#location">
+                <div class="location-title" v-if="$store.state.localStorage.city !== ''">{{$store.state.localStorage.city.title}}</div>
+                <div class="location-title" v-else>Не выбрано</div>
+                <div class="location-icon"></div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 </template>
 
@@ -43,33 +45,39 @@ export default {
     },
     data() {
         return {
+            url: 'https://reserved-app.kz',
             countries: [],
         }
     },
     created() {
-        this.getCountry();
+        if (process.browser) {
+            this.getCountry();
+        }
     },
     methods: {
         getCountry: function() {
-            if (!sessionStorage.countries) {
-                axios.get('/api/countries')
+            if (!this.$store.state.sessionStorage.countries) {
+                this.$axios.get(this.url+'/api/countries',{
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                })
                     .then(response => {
                         let data    =   response.data;
                         if (data.hasOwnProperty('data')) {
-                            data    =   data.data;
-                            this.countries  =   data;
-                            sessionStorage.countries    =   JSON.stringify(data);
-                            if (this.storage.city === '') {
-                                this.storage.city   =   this.countries[0].city_id[0];
+                            this.countries  =   data.data;
+                            this.$store.commit('sessionStorage/setCountries',data.data);
+                            if (this.$store.state.localStorage.city === '') {
+                                this.$store.state.localStorage.city =   this.countries[0].city_id[0];
                             }
                         }
                     }).catch(error => {
                         console.log(error.response);
                     });
             } else {
-                this.countries  =   JSON.parse(sessionStorage.countries);
-                if (this.storage.city === '') {
-                    this.storage.city   =   this.countries[0].city_id[0];
+                this.countries  =   this.$store.state.sessionStorage.countries;
+                if (this.$store.state.localStorage.city === '') {
+                    this.$store.state.localStorage.city   =   this.countries[0].city_id[0];
                 }
             }
         }

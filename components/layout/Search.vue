@@ -10,18 +10,14 @@
                             <input type="text" v-model="text" placeholder="Поиск" @focus="searchView = true" @input="startSearch" @mousedown.stop @compositionupdate="compositionUpdate($event)">
                             <div class="search-text_input-main-list" v-if="searchView" @mousedown.stop>
                                 <template v-if="text !== ''">
-                                    <template v-if="search.length > 0">
-                                        <a :href="'/home/'+item.category_id.slug+'/'+item.id" class="search-text_input-main-list-option" v-for="(item,key) in search" :key="key">
-                                            <div class="search-text_input-main-list-option-icon" :style="{'background-image': 'url('+item.image+')'}"></div>
-                                            <div class="search-text_input-main-list-option-detail">
-                                                <div class="search-text_input-main-list-option-detail-title">{{item.title}}</div>
-                                                <div class="search-text_input-main-list-option-detail-desc">{{item.description}}</div>
-                                            </div>
-                                        </a>
-                                    </template>
-                                    <template v-else>
-                                        <div class="search-text_input-main-list-start">По вашему запросу ничего не найдено</div>
-                                    </template>
+                                    <a :href="'/home/'+item.category_id.slug+'/'+item.id" class="search-text_input-main-list-option" v-for="(item,key) in search" :key="key" v-if="search.length > 0">
+                                      <div class="search-text_input-main-list-option-icon" :style="{'background-image': 'url('+item.image+')'}"></div>
+                                      <div class="search-text_input-main-list-option-detail">
+                                        <div class="search-text_input-main-list-option-detail-title">{{item.title}}</div>
+                                        <div class="search-text_input-main-list-option-detail-desc">{{item.description}}</div>
+                                      </div>
+                                    </a>
+                                    <div class="search-text_input-main-list-start" v-else>По вашему запросу ничего не найдено</div>
                                 </template>
                                 <template v-else>
                                     <div class="search-text_input-main-list-start">Здесь будет отображаться список найденных заведений</div>
@@ -94,17 +90,15 @@
                                 </div>
                             </div>
                         </div>
-                        <template v-for="(tag,key) in tags" :key="key">
-                            <div class="search-layout-item">
-                                <div class="search-layout-item-title" @click="tag.open = !tag.open">{{tag.title}}</div>
-                                <div class="search-layout-item-select" :class="{'search-layout-item-select-close':!tag.open}">
-                                    <div class="search-layout-item-select-option" v-for="(item,optionKey) in tag.tags_option" :key="optionKey" @click="setTagVal(key,optionKey)">
-                                        <div class="search-layout-item-select-option-checkbox" :class="{'search-layout-item-select-option-checkbox-checked':item.checked}"></div>
-                                        <div class="search-layout-item-select-option-title">{{item.title}}</div>
-                                    </div>
+                        <div class="search-layout-item" v-for="(tag,key) in tags" :key="key">
+                            <div class="search-layout-item-title" @click="tag.open = !tag.open">{{tag.title}}</div>
+                            <div class="search-layout-item-select" :class="{'search-layout-item-select-close':!tag.open}">
+                                <div class="search-layout-item-select-option" v-for="(item,optionKey) in tag.tags_option" :key="optionKey" @click="setTagVal(key,optionKey)">
+                                  <div class="search-layout-item-select-option-checkbox" :class="{'search-layout-item-select-option-checkbox-checked':item.checked}"></div>
+                                  <div class="search-layout-item-select-option-title">{{item.title}}</div>
                                 </div>
                             </div>
-                        </template>
+                        </div>
                         <div class="search-layout-item">
                             <div class="search-layout-item-title" @click="other = !other">Прочее</div>
                             <div class="search-layout-item-select" :class="{'search-layout-item-select-close':!other}">
@@ -131,6 +125,7 @@ export default {
     name: "Search",
     data() {
         return {
+            url: 'https://reserved-app.kz',
             price: false,
             prices: [
                 {min:{status:false,sum:0},max:{status:true,sum:1500},checked:false},
@@ -166,9 +161,11 @@ export default {
     created() {
         this.getFilter();
         let self    =   this;
-        window.addEventListener('mousedown',function() {
-            self.searchView =   false;
-        });
+        if (process.browser) {
+            window.addEventListener('mousedown',function() {
+              self.searchView =   false;
+            });
+        }
     },
     methods: {
         compositionUpdate: function(event)
@@ -187,7 +184,11 @@ export default {
             }
         },
         getSearchOrganizations: function() {
-            axios.get('/api/organization/search/'+this.text.trim()).then(response => {
+            this.$axios.get(this.url+'/api/organization/search/'+this.text.trim(),{
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }).then(response => {
                 this.search =   response.data.data;
             });
         },
@@ -204,7 +205,11 @@ export default {
             this.ratings[key].checked   =   !this.ratings[key].checked;
         },
         getFilter: function() {
-            axios.get('/api/organization/filter').then(response => {
+            this.$axios.get(this.url+'/api/organization/filter',{
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }).then(response => {
                 let filter  =   response.data;
                 this.tags   =   filter.tags_id;
                 this.others =   filter.tags_option_id;
@@ -291,5 +296,5 @@ export default {
 </script>
 
 <style lang="scss">
-    @import '../../../css/layout/Search.scss';
+    @import '../../assets/layout/Search.scss';
 </style>

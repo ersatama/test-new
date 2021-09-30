@@ -1,8 +1,10 @@
 <template>
-    <Header></Header>
-    <profile-section :category="category"></profile-section>
-    <organization v-if="category" :category="category"></organization>
-    <Footer></Footer>
+    <div>
+      <Header></Header>
+      <profile-section :category="category"></profile-section>
+      <organization v-if="category" :category="category"></organization>
+      <Footer></Footer>
+    </div>
 </template>
 
 <script>
@@ -11,7 +13,7 @@ import Footer from "../../../components/footer/Footer";
 import ProfileSection from '../../../components/sections/ProfileSection';
 import Organization from '../../../components/layout/Organization';
 export default {
-    name: "Category",
+    name: "Index",
     components: {
         Header,
         Footer,
@@ -20,6 +22,7 @@ export default {
     },
     data() {
         return {
+            url: 'https://reserved-app.kz',
             category: false,
         }
     },
@@ -28,7 +31,7 @@ export default {
     },
     methods: {
         getCategoryBySlug: function() {
-            this.$axios.get('/api/category/slug/'+this.$route.params.category)
+            this.$axios.get(this.url+'/api/category/slug/'+this.$route.params.category)
                 .then(response => {
                     this.category   =   response.data.data;
                 });

@@ -1,11 +1,11 @@
 <template>
     <div class="container">
-        <div class="modal fade" id="auth_modal" tabindex="-1" role="dialog" aria-labelledby="auth_modal" aria-hidden="true">
+        <div class="modal" id="auth_modal" tabindex="-1" role="dialog" aria-labelledby="auth_modal" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content auth-modal">
                     <div class="modal-body">
                         <div class="form-group d-flex justify-content-end">
-                            <button class="auth-btn-close" data-dismiss="modal" aria-label="Close"></button>
+                            <button class="auth-btn-close" ref="auth_close" data-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <template v-if="password.check">
                             <div class="form-group">
@@ -84,7 +84,7 @@
                                 </div>
                             </div>
                         </template>
-                        <template v-else-if="storage.auth">
+                        <template v-else-if="$store.state.localStorage.auth">
                             <div class="form-group">
                                 <h3 class="text-center auth-title">Войдите</h3>
                                 <h6 class="text-secondary text-center mt-3 auth-description">Войдите или создайте новый аккаунт Reserved.</h6>
@@ -95,7 +95,7 @@
                             <div class="form-row mx-md-3">
                                 <div class="col-12 mt-md-3 auth-row">
                                     <div class="auth-phone-prefix">+7</div>
-                                    <input type="text" class="form-control p-3 auth-input auth-phone" v-maska="'##########'" v-model="login.phone" ref="phone" v-on:keyup.enter="login_btn" pattern="[0-9]*" inputmode="numeric">
+                                    <input type="text" class="form-control p-3 auth-input auth-phone" v-maska="'##########'" v-model="login.phone" ref="phone" @keyup.enter="login_btn" pattern="[0-9]*" inputmode="numeric" @change.stop>
                                 </div>
                                 <div class="col-12 mt-md-3 auth-row">
                                     <input type="password" class="form-control p-3 auth-input" v-model="login.password" placeholder="Пароль" ref="password" v-on:keyup.enter="login_btn">
@@ -107,7 +107,7 @@
                                     </button>
                                 </div>
                                 <div class="col-12 mt-md-3 auth-row">
-                                    <button class="btn btn-block auth-register text-white" @click="storage.auth = false">Регистрация</button>
+                                    <button class="btn btn-block auth-register text-white" @click="$store.commit('localStorage/setAuth',false)">Регистрация</button>
                                 </div>
                                 <div class="col-12 mt-md-3 auth-row">
                                     <button class="btn btn-block text-secondary auth-forgot" @click="reset.check = true">Забыли пароль</button>
@@ -140,7 +140,7 @@
                                     </button>
                                 </div>
                                 <div class="col-12 mt-md-3 auth-row">
-                                    <button class="btn btn-block auth-register text-white" @click="storage.auth = true">Войти</button>
+                                    <button class="btn btn-block auth-register text-white" @click="$store.commit('localStorage/setAuth',true)">Войти</button>
                                 </div>
                                 <div class="col-12 mt-md-3 auth-row">
                                     <button class="btn btn-block text-secondary auth-forgot" @click="reset.check = true">Забыли пароль</button>
@@ -168,6 +168,7 @@ export default {
     name: "Auth",
     data: function() {
         return {
+            url: 'https://reserved-app.kz',
             password: {
                 check: false,
                 status: true,
@@ -234,7 +235,7 @@ export default {
                     return this.password.error  =   true;
                 }
                 this.password.status    =   false;
-                axios.post('/api/user/reset/'+this.reset.user.id,{
+                this.$axios.post(this.url+'/api/user/reset/'+this.reset.user.id,{
                     password: this.password.confirm.trim()
                 })
                     .then(response => {
@@ -248,12 +249,16 @@ export default {
                     return this.$refs.reset_code.focus();
                 }
                 this.reset.checkStatus  =   false;
-                axios.get('/api/sms/'+this.reset.user.phone+'/'+this.reset.code)
+                this.$axios.get(this.url+'/api/sms/'+this.reset.user.phone+'/'+this.reset.code,{
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
                     .then(response => {
                         let data    =   response.data;
                         if (data.hasOwnProperty('data')) {
-                            this.storage.token  =   data.data.api_token;
-                            sessionStorage.user =   JSON.stringify(data.data);
+                            this.$store.commit('localStorage/setToken',data.data.api_token);
+                            this.$store.commit('sessionStorage/setUser',data.data);
                             this.password.check =   true;
                             this.reset.checkStatus  =   true;
                         }
@@ -265,13 +270,17 @@ export default {
             }
         },
         reset_btn: function() {
-            if (!this.storage.token && this.reset.status) {
+            if (!!this.$store.state.localStorage.token && this.reset.status) {
                 if (this.reset.phone.trim() === '') {
                     return this.$refs.reset_phone.focus();
                 }
                 this.reset.error    =   false;
                 this.reset.status   =   false;
-                axios.get('/api/sms/reset/7'+this.reset.phone)
+                this.$axios.get(this.url+'/api/sms/reset/7'+this.reset.phone,{
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                })
                     .then(response => {
                         this.reset.user =   response.data.data;
                         this.reset.status   =   true;
@@ -291,12 +300,16 @@ export default {
                     }
                     this.sms.error    =   false;
                     this.sms.status   =   false;
-                    axios.get('/api/sms/'+this.sms.phone+'/'+this.sms.code)
+                    this.$axios.get(this.url+'/api/sms/'+this.sms.phone+'/'+this.sms.code,{
+                      headers: {
+                        'Content-Type': 'application/json'
+                      }
+                    })
                     .then(response => {
                         let data    =   response.data;
                         if (data.hasOwnProperty('data')) {
-                            this.storage.token  =   data.data.api_token;
-                            sessionStorage.user =   JSON.stringify(data.data);
+                            this.$store.commit('localStorage/setToken',data.data.api_token);
+                            this.$store.commit('sessionStorage/setUser',data.data);
                             this.$router.push('/home');
                         }
                     }).catch(error => {
@@ -307,7 +320,7 @@ export default {
             }
         },
         register_btn: function() {
-            if (!this.storage.token) {
+            if (!this.$store.state.localStorage.token) {
                 if (this.register.status) {
                     if (this.register.name.trim() === '') {
                         return this.$refs.name_register.focus();
@@ -318,12 +331,15 @@ export default {
                     }
                     this.register.error    =   false;
                     this.register.status   =   false;
-                    let data = {
+                    this.$axios.post(this.url+"/api/register", {
                         name: this.register.name.trim(),
                         phone: '7'+this.register.phone.trim(),
                         password: this.register.password.trim()
-                    };
-                    axios.post("/api/register", data)
+                    },{
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
                     .then(response => {
                         let data = response.data;
                         if (data.hasOwnProperty('data')) {
@@ -349,7 +365,7 @@ export default {
             }
         },
         login_btn: function() {
-            if (!this.storage.token) {
+            if (!this.$store.state.localStorage.token) {
                 if (this.login.status) {
                     if (this.login.phone.trim().length !== 10) {
                         return this.$refs.phone.focus();
@@ -358,19 +374,27 @@ export default {
                     }
                     this.login.error    =   false;
                     this.login.status   =   false;
-                    axios.get('/api/login/7'+this.login.phone+'/'+this.login.password)
+                    this.$axios.get(this.url+'/api/login/7'+this.login.phone+'/'+this.login.password,{
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
                     .then(response => {
                         let data    =   response.data;
                         if (data.hasOwnProperty('data')) {
+
                             if (data.data.phone_verified_at === 'Не подтвержден' || data.data.phone_verified_at === 'Not verified') {
                                 this.sms.check = true;
                                 this.sms.status = true;
                                 this.sms.phone = data.data.phone;
                             } else {
-                                this.storage.token  =   data.data.api_token;
-                                sessionStorage.user =   JSON.stringify(data.data);
+                                this.$store.commit('localStorage/setToken',data.data.api_token);
+                                this.$store.commit('sessionStorage/setUser',data.data);
+                                this.login.status   =   true;
+                                this.login.phone    =   '';
+                                this.login.password =   '';
                                 this.login.error    =   false;
-                                this.router.push('/home');
+                                this.$refs.auth_close.click();
                             }
                         }
                     }).catch(error => {
@@ -387,5 +411,5 @@ export default {
 </script>
 
 <style lang="scss">
-    @import '../../../../css/header/auth/auth.scss';
+    @import '../../../assets/header/auth/auth.scss';
 </style>

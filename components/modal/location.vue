@@ -15,7 +15,7 @@
                                 <div class="location-country-item" v-for="(country,key) in countries" :class="{'location-item-sel':(countryId === key)}" :key="key" @click="countryId = key">{{country.title}}</div>
                             </div>
                             <div class="location-city">
-                                <div class="location-city-item" v-for="(city,key) in countries[countryId].city_id" :key="key" :class="{'location-item-sel':(city.id === storage.city.id)}" @click="citySel(city)" data-dismiss="modal" aria-label="Close">{{city.title}}</div>
+                                <div class="location-city-item" v-for="(city,key) in countries[countryId].city_id" :key="key" :class="{'location-item-sel':(city.id === $store.state.localStorage.city.id)}" @click="citySel(city)" data-dismiss="modal" aria-label="Close">{{city.title}}</div>
                             </div>
                         </div>
                     </div>
@@ -35,14 +35,16 @@ export default {
         }
     },
     created() {
-        this.countrySel();
+        if (process.browser) {
+          this.countrySel();
+        }
     },
     methods: {
         countrySel: function() {
-              if (this.storage.city) {
+              if (this.$store.state.localStorage.city) {
                   let index =   0;
                   this.countries.forEach(item => {
-                      if (item.id === this.storage.city.country_id) {
+                      if (item.id === this.$store.state.localStorage.city.country_id) {
                           this.countryId    =   index;
                       }
                       index++;
@@ -50,8 +52,8 @@ export default {
               }
         },
         citySel: function(city) {
-            if (this.storage.city.id !== city.id) {
-                this.storage.city   =   city;
+            if (this.$store.state.localStorage.city.id !== city.id) {
+              this.$store.state.localStorage.city   =   city;
                 window.location.reload();
             }
         }

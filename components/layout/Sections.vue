@@ -1,73 +1,75 @@
 <template>
-    <div class="container-fluid pb-3 pb-md-5 organization-bg" v-if="organization">
+    <div>
+      <div class="container-fluid pb-3 pb-md-5 organization-bg" v-if="organization">
         <div class="container">
-            <div class="row pt-4">
-                <div class="col-12">
-                    <div>
-                        <div class="row justify-content-center mt-md-3">
-                            <div class="col-12 col-md-6 col-lg-4 p-0">
-                                <div class="form-group organization-date" onselectstart="return false;">
-                                    <a class="text-decoration-none cursor-pointer" :class="{'organization-arr-btn':date.before}" @click="previousDay()">&#8249;</a>
-                                    <div type="text" class="border-0 organization-input text-dark text-center font-weight-bold" :data-date="date.data">
-                                        <div>{{date.title}}</div>
-                                    </div>
-                                    <a class="text-decoration-none cursor-pointer" :class="{'organization-arr-btn':date.after}" @click="nextDay()">&#8250;</a>
-                                </div>
-                            </div>
-                        </div>
-                        <template v-if="!isWorking">
-                            <div class="locked">
-                                <div class="locked-icon"></div>
-                                <div class="locked-info">
-                                    <div class="locked-title">Заведение закрыто</div>
-                                    <div class="locked-desc">Возможно в данный момент заведение закрыто или не работает.</div>
-                                </div>
-                            </div>
-                        </template>
-                        <template v-else>
-                            <div class="row justify-content-center mt-3">
-                                <div>
-                                    <div class="d-flex">
-                                        <button type="button" class="btn organization-btn font-weight-bold mx-2" v-for="(item,key) in sections || []" :key="key" :class="{'organization-btn-sel':(key === section)}" @click="section = key">{{item.name}}</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center mt-4"  v-for="(item,key) in sections" :key="key" :class="{'d-none':(key !== section)}">
-                                <div class="col-6 col-lg-3 p-md-2 p-1" v-for="(table,tableKey) in item.organization_tables" :key="tableKey" @mousedown="selTable(key,tableKey)">
-                                    <div class="card border-0 organization-shadow" data-toggle="modal" data-target="#booking_modal">
-                                        <div class="card-body organization-card-main">
-                                            <div class="organization-card">
-                                                <div class="row align-content-center pl-3">
-                                                    <div class="organization-card-title w-100 font-weight-bold">{{table.title}}</div>
-                                                    <div class="lds-ellipsis" v-if="table.bookingStatus === undefined">
-                                                        <div></div>
-                                                        <div></div>
-                                                        <div></div>
-                                                        <div></div>
-                                                    </div>
-                                                    <div class="organization-card-status organization-card-status-free" v-else-if="table.status === 'ENABLED' && (table.bookingStatus === null || table.bookingStatus.status === 'COMPLETED')">
-                                                        <span v-if="table.price > 0">Депозит {{table.price}} ₸</span>
-                                                        <span v-else>Свободно</span>
-                                                    </div>
-                                                    <div class="organization-card-status organization-card-status-reserved" v-else>Занято</div>
-                                                </div>
-                                                <div>
-                                                    <div class="organization-card-icon"></div>
-                                                    <div class="organization-card-limit text-secondary text-center">{{table.limit}} чл.</div>
-                                                </div>
-                                                <div class="organization-card-arr"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
+          <div class="row pt-4">
+            <div class="col-12">
+              <div>
+                <div class="row justify-content-center mt-md-3">
+                  <div class="col-12 col-md-6 col-lg-4 p-0">
+                    <div class="form-group organization-date" onselectstart="return false;">
+                      <a class="text-decoration-none cursor-pointer" :class="{'organization-arr-btn':date.before}" @click="previousDay()">&#8249;</a>
+                      <div type="text" class="border-0 organization-input text-dark text-center font-weight-bold" :data-date="date.data">
+                        <div>{{date.title}}</div>
+                      </div>
+                      <a class="text-decoration-none cursor-pointer" :class="{'organization-arr-btn':date.after}" @click="nextDay()">&#8250;</a>
                     </div>
+                  </div>
                 </div>
+                <template v-if="!isWorking">
+                  <div class="locked">
+                    <div class="locked-icon"></div>
+                    <div class="locked-info">
+                      <div class="locked-title">Заведение закрыто</div>
+                      <div class="locked-desc">Возможно в данный момент заведение закрыто или не работает.</div>
+                    </div>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="row justify-content-center mt-3">
+                    <div>
+                      <div class="d-flex">
+                        <button type="button" class="btn organization-btn font-weight-bold mx-2" v-for="(item,key) in sections || []" :key="key" :class="{'organization-btn-sel':(key === section)}" @click="section = key">{{item.name}}</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row justify-content-center mt-4"  v-for="(item,key) in sections" :key="key" :class="{'d-none':(key !== section)}">
+                    <div class="col-6 col-lg-3 p-md-2 p-1" v-for="(table,tableKey) in item.organization_tables" :key="tableKey" @mousedown="selTable(key,tableKey)">
+                      <div class="card border-0 organization-shadow" data-toggle="modal" data-target="#booking_modal">
+                        <div class="card-body organization-card-main">
+                          <div class="organization-card">
+                            <div class="row align-content-center pl-3">
+                              <div class="organization-card-title w-100 font-weight-bold">{{table.title}}</div>
+                              <div class="lds-ellipsis" v-if="table.bookingStatus === undefined">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                              </div>
+                              <div class="organization-card-status organization-card-status-free" v-else-if="table.status === 'ENABLED' && (table.bookingStatus === null || table.bookingStatus.status === 'COMPLETED')">
+                                <span v-if="table.price > 0">Депозит {{table.price}} ₸</span>
+                                <span v-else>Свободно</span>
+                              </div>
+                              <div class="organization-card-status organization-card-status-reserved" v-else>Занято</div>
+                            </div>
+                            <div>
+                              <div class="organization-card-icon"></div>
+                              <div class="organization-card-limit text-secondary text-center">{{table.limit}} чл.</div>
+                            </div>
+                            <div class="organization-card-arr"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+      <Booking :organization="organization" :table="table" :date="date"></Booking>
     </div>
-    <Booking :organization="organization" :table="table" :date="date"></Booking>
 </template>
 <script>
 import Booking from '../modal/Booking';

@@ -1,32 +1,34 @@
 <template>
-    <loading v-if="Loading"></loading>
-    <div class="container-fluid py-3 py-md-4 item-bg" v-else-if="organizations.length > 0 && storage.favorite.length > 0">
+    <div>
+      <loading v-if="Loading"></loading>
+      <div class="container-fluid py-3 py-md-4 item-bg" v-else-if="organizations.length > 0 && $store.state.localStorage.favorite.length > 0">
         <div class="container">
-            <div class="row">
-                <div class="result">
-                    <div class="result-body">
-                        <div class="result-body-main result-body-main-single">
-                            <Card :organization="organization" v-for="(organization,key) in organizations" :key="key"></Card>
-                        </div>
-                    </div>
+          <div class="row">
+            <div class="result">
+              <div class="result-body">
+                <div class="result-body-main result-body-main-single">
+                  <Card :organization="organization" v-for="(organization,key) in organizations" :key="key"></Card>
                 </div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+      <not-found v-else :params="NotFound" ></not-found>
     </div>
-    <not-found v-else :params="NotFound" ></not-found>
 </template>
 
 <script>
 import Loading from '../layout/Loading';
 import NotFound from '../layout/Not-found';
-import Filter from '../layout/Filter';
+import FilterBlock from '../layout/Filter-block';
 import Card from '../layout/Card';
 export default {
     name: "searchOrganization",
     components: {
         Loading,
         NotFound,
-        Filter,
+        FilterBlock,
         Card
     },
     data() {
@@ -46,7 +48,7 @@ export default {
     methods: {
         getOrganizations: function() {
             if (this.$route.query.tag && this.$route.query.tag.trim() !== '') {
-                axios.get('/api/organization/tag/'+this.$route.query.tag.trim())
+                this.$axios.get('/api/organization/tag/'+this.$route.query.tag.trim())
                     .then(response => {
                         let data    =   response.data;
                         console.log(data);

@@ -1,37 +1,39 @@
 <template>
-    <loading v-if="Loading"></loading>
-    <div class="container-fluid py-3 py-md-4 item-bg" v-else-if="category">
+    <div>
+      <loading v-if="Loading"></loading>
+      <div class="container-fluid py-3 py-md-4 item-bg" v-else-if="category">
         <div class="container">
-            <div class="row">
-                <div class="result">
-                    <div class="result-body">
-                        <div class="result-body-header">
-                            <div class="result-body-header-count" v-if="found >= 0">Найдено заведении <span>{{found}}</span></div>
-                            <div class="result-body-header-sort">
-                                <div class="result-body-header-sort-title">Сортировка:</div>
-                                <div class="result-body-header-sort-dropdown">
-                                    <div class="result-body-header-sort-dropdown-title" @click="selected.show = !selected.show">{{ sort[selected.index].title }}</div>
-                                    <div class="result-body-header-sort-dropdown-list" :class="{'result-body-header-sort-dropdown-list-open':selected.show}">
-                                        <div class="result-body-header-sort-dropdown-list-item" v-for="(item,key) in sort" :key="key" @click=" selectedValue(key); ; selected.show = false">{{item.title}}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="result-body-main">
-                            <Card :organization="organization" v-for="(organization,key) in organizations" :key="key"></Card>
-                        </div>
+          <div class="row">
+            <div class="result">
+              <div class="result-body">
+                <div class="result-body-header">
+                  <div class="result-body-header-count" v-if="found >= 0">Найдено заведении <span>{{found}}</span></div>
+                  <div class="result-body-header-sort">
+                    <div class="result-body-header-sort-title">Сортировка:</div>
+                    <div class="result-body-header-sort-dropdown">
+                      <div class="result-body-header-sort-dropdown-title" @click="selected.show = !selected.show">{{ sort[selected.index].title }}</div>
+                      <div class="result-body-header-sort-dropdown-list" :class="{'result-body-header-sort-dropdown-list-open':selected.show}">
+                        <div class="result-body-header-sort-dropdown-list-item" v-for="(item,key) in sort" :key="key" @click=" selectedValue(key); ; selected.show = false">{{item.title}}</div>
+                      </div>
                     </div>
+                  </div>
                 </div>
+                <div class="result-body-main">
+                  <Card :organization="organization" v-for="(organization,key) in organizations" :key="key"></Card>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+      <not-found v-else :params="NotFound" ></not-found>
     </div>
-    <not-found v-else :params="NotFound" ></not-found>
 </template>
 
 <script>
-import Loading from '../layout/Loading';
-import NotFound from '../layout/Not-found';
-import Card from '../layout/Card';
+import Loading from '../../components/layout/Loading';
+import NotFound from '../../components/layout/Not-found';
+import Card from '../../components/layout/Card';
 export default {
     props: ['category'],
     name: "Organization",
@@ -42,6 +44,7 @@ export default {
     },
     data() {
         return  {
+            url: 'https://reserved-app.kz',
             NotFound: {
                 img: '/img/logo/reserved.png',
                 title: 'Не найдено',
@@ -75,12 +78,16 @@ export default {
         }
     },
     created() {
-        this.setFilter();
-        this.getCountOrganizationsByCategoryId();
-        this.getOrganizationsByCategoryId();
+        if (process.browser) {
+          this.setFilter();
+          this.getCountOrganizationsByCategoryId();
+          this.getOrganizationsByCategoryId();
+        }
     },
     mounted() {
-        this.scrollEvent();
+        if (process.browser) {
+          this.scrollEvent();
+        }
     },
     methods: {
         scrollEvent: function() {
@@ -107,7 +114,7 @@ export default {
             this.filter =   data;
         },
         getCountOrganizationsByCategoryId: function() {
-            axios.post('/api/category/count/organizations/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
+            this.$axios.post(this.url+'/api/category/count/organizations/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
                 .then(response => {
                     this.found  =   response.data;
                 }).catch(error => {
@@ -118,7 +125,7 @@ export default {
             if (this.category && this.status) {
                 this.status =   false;
                 this.filter.sort    =   this.selected.index;
-                axios.post('/api/category/filter/organizations/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
+                this.$axios.post(this.url+'/api/category/filter/organizations/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
                     .then(response => {
                         let data    =   response.data.data;
                         for (let i = 0; i < data.length; i++) {
@@ -142,21 +149,21 @@ export default {
             }
         },
         setFilter: function() {
-            if (this.storage.city) {
-                this.city =   this.storage.city.id;
+            if (this.$store.state.localStorage.city) {
+                this.city =   this.$store.state.localStorage.city.id;
             }
         },
         favorite: function(id) {
-            let len =   this.storage.favorite.length;
+            let len =   this.$store.state.localStorage.favorite.length;
             let status  =   true;
             for (let i = 0; i < len; i++) {
-                if (this.storage.favorite[i] === id) {
-                    this.storage.favorite.splice(i,1);
+                if (this.$store.state.localStorage.favorite[i] === id) {
+                    this.$store.commit('localStorage/spliceFavorite',i);
                     status  =   false;
                 }
             }
             if (status) {
-                this.storage.favorite.push(id);
+              this.$store.state.localStorage.favorite.push(id);
             }
         },
         getTime: function(organization) {
@@ -193,5 +200,5 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../css/layout/organization.scss';
+@import '../../assets/layout/organization.scss';
 </style>

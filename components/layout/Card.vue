@@ -68,22 +68,19 @@ export default {
     methods: {
         subscribeNow: function() {
             if (!this.subscribe) {
-                this.$axios.post(this.url+'/api/newsSubscribe/create',{
-                    organization_id: this.organization.id,
-                    user_id: this.user.id
-                }).then(response => {
+                this.$axios.post('/api/newsSubscribe/create').then(response => {
                     this.subscribe  =   response.data.data;
                 });
             } else if (this.subscribe.status === 'on') {
                 this.subscribe.status   =   'off';
-                this.$axios.post(this.url+'/api/newsSubscribe/update/'+this.subscribe.id,{
+                this.$axios.post('/api/newsSubscribe/update/'+this.subscribe.id,{
                     organization_id: this.organization.id,
                     user_id: this.user.id,
                     status: 'off'
                 });
             } else {
                 this.subscribe.status   =   'on';
-                this.$axios.post(this.url+'/api/newsSubscribe/update/'+this.subscribe.id,{
+                this.$axios.post('/api/newsSubscribe/update/'+this.subscribe.id,{
                     organization_id: this.organization.id,
                     user_id: this.user.id,
                     status: 'on'
@@ -97,7 +94,7 @@ export default {
                     this.status = true;
                     this.user = user;
                 } else {
-                    await this.$axios.get(this.url+'/api/token/' + this.$store.state.localStorage.token)
+                    await this.$axios.get('/api/token/' + this.$store.state.localStorage.token)
                         .then(response => {
                             let data = response.data;
                             if (data.hasOwnProperty('data')) {
@@ -126,7 +123,7 @@ export default {
         },
         getSubscribe: function() {
             if (this.user) {
-                this.$axios.get(this.url+'/api/newsSubscribe/getByOrganizationIdAndUserId/'+this.organization.id+'/'+this.user.id)
+                this.$axios.get('/api/newsSubscribe/getByOrganizationIdAndUserId/'+this.organization.id+'/'+this.user.id)
                     .then(response => {
                         this.subscribe  =   response.data.data;
                     }).catch(error => {

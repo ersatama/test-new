@@ -1,5 +1,5 @@
-export default ({ $axios, env }) => {
-  $axios.onRequest(config => {
-    config.headers['Content-Type'] = 'application/json';
-  });
-}
+import axios from 'axios'
+
+export default axios.create({
+  baseURL: process.env.baseUrl,
+});

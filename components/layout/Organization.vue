@@ -114,7 +114,7 @@ export default {
             this.filter =   data;
         },
         getCountOrganizationsByCategoryId: function() {
-            this.$axios.post(this.url+'/api/category/count/organizations/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
+            this.$axios.post(this.url+'/api/category/count/organization/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
                 .then(response => {
                     this.found  =   response.data;
                 }).catch(error => {
@@ -125,7 +125,7 @@ export default {
             if (this.category && this.status) {
                 this.status =   false;
                 this.filter.sort    =   this.selected.index;
-                this.$axios.post(this.url+'/api/category/filter/organizations/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
+                this.$axios.post(this.url+'/api/category/filter/organization/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
                     .then(response => {
                         let data    =   response.data.data;
                         for (let i = 0; i < data.length; i++) {

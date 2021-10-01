@@ -43,8 +43,8 @@ export default {
   plugins: [
       { src: '~/plugins/vue-easy-lightbox.js', mode: 'client' , ssr: false},
       { src: '~/plugins/vue3-perfect-scrollbar.js', mode: 'client' , ssr: false},
-      { src: '~/plugins/axios', mode: 'client', ssr: false},
-      { src: '~/plugins/vue-snip.js', mode: 'client', ssr: false}
+      { src: '~/plugins/vue-snip.js', mode: 'client', ssr: false},
+      { src: '~/plugins/repository.js', mode: 'client'}
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -61,5 +61,11 @@ export default {
   ],
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+  },
+  env: {
+    baseUrl: 'https://reserved-app.kz'
+  },
+  axios: {
+    baseURL: 'https://reserved-app.kz',
   }
 }

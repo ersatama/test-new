@@ -22,7 +22,6 @@ export default {
     },
     data() {
         return {
-            url: 'https://reserved-app.kz',
             category: false,
         }
     },
@@ -31,10 +30,9 @@ export default {
     },
     methods: {
         getCategoryBySlug: function() {
-            this.$axios.get(this.url+'/api/category/slug/'+this.$route.params.category)
-                .then(response => {
-                    this.category   =   response.data.data;
-                });
+            this.$repository.category.getCategoryBySlug(this.$route.params.category).then(response => {
+                this.category = response;
+            });
         },
     }
 }

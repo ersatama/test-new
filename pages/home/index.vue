@@ -87,7 +87,6 @@ export default {
   name: "Home",
   data() {
     return {
-      url: 'https://reserved-app.kz',
       menu: [],
       Loading: true,
       notFound: {
@@ -151,46 +150,30 @@ export default {
       }
     },
     getCountOrganizationsByCategoryId: function() {
-      this.$axios.post(this.url+'/api/category/count/city/'+this.city+'/'+this.page,this.filters,{
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-        .then(response => {
-          this.found  =   response.data;
-        }).catch(error => {
-          this.found  =   -1;
-        });
+      this.$repository.home.getCountOrganizationsByCategoryId(this.city,this.page,this.filters).then(response => {
+        this.found  = response;
+      });
     },
     getOrganizationsByCategoryId: function() {
       if (!this.result && this.status) {
         this.status =   false;
         this.filters.sort    =   this.selected.index;
-        this.$axios.post(this.url+'/api/category/filter/city/'+this.city+'/'+this.page,this.filters,{
-          headers: {
-            'Content-Type': 'application/json'
+        this.$repository.home.getOrganizationsByCategoryId(this.city,this.page,this.filters).then(response => {
+          for (let i = 0; i < response.length; i++) {
+            response[i].timeTitle   =   this.getTime(response[i]);
           }
-        })
-          .then(response => {
-            let data    =   response.data.data;
-            for (let i = 0; i < data.length; i++) {
-              data[i].timeTitle   =   this.getTime(data[i]);
-            }
-            if (this.init) {
-              this.init   =   false;
-              this.organizations  =   data;
-            } else {
-              this.organizations  =   this.organizations.concat(data);
-            }
-            this.Loading        =   false;
-            this.page++;
-            if (data.length === 15) {
-              this.status         =   true;
-            }
-          }).catch(error => {
-            this.Loading    =   false;
-            this.status     =   true;
-          });
+          if (this.init) {
+            this.init   =   false;
+            this.organizations  =   response;
+          } else {
+            this.organizations  =   this.organizations.concat(response);
+          }
+          this.Loading  =   false;
+          this.page++;
+          if (response.length === 15) {
+            this.status =   true;
+          }
+        });
       }
     },
     filterUpdate: function(data) {
@@ -203,27 +186,21 @@ export default {
       this.getCountOrganizationsByCategoryId();
       this.getOrganizationsByCategoryId();
     },
-    getCategories: function() {
+    setCity: function() {
       if (this.$store.state.localStorage.city) {
-        this.city =   this.$store.state.localStorage.city.id;
+        this.city = this.$store.state.localStorage.city.id;
       }
-      this.$axios.get(this.url+'/api/category/list',{
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-        .then(response => {
-          this.Loading    =   false;
-          this.menu       =   response.data.data;
-        }).catch(error => {
-          this.Loading    =   false;
-        });
-
+    },
+    getCategories: function () {
+      this.setCity();
+      this.$repository.home.list().then(response => {
+        this.menu = response;
+        this.Loading  = false;
+      });
     },
     favorite: function(id) {
-      let len =   this.$store.state.localStorage.favorite.length;
       let status  =   true;
-      for (let i = 0; i < len; i++) {
+      for (let i = 0; i < this.$store.state.localStorage.favorite.length; i++) {
         if (this.$store.state.localStorage.favorite[i] === id) {
           this.$store.commit('localStorage/spliceFavorite',i);
           status  =   false;

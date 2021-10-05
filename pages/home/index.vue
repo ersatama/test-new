@@ -3,7 +3,7 @@
     <Header></Header>
     <profile-section></profile-section>
     <Search @filterUpdate="filterUpdate"></Search>
-    <loading v-if="Loading"></loading>
+    <loading v-if="!menu"></loading>
     <div class="container-fluid p-0 m-0 home-bg-color" v-else-if="result && menu.length">
       <div class="container p-0">
         <div class="row home-main">
@@ -87,8 +87,6 @@ export default {
   name: "Home",
   data() {
     return {
-      menu: [],
-      Loading: true,
       notFound: {
         img: '/img/logo/menu.svg',
         title: 'Список пуст',
@@ -113,17 +111,23 @@ export default {
         index: 0,
         show: false,
       },
-      status: true,
-      city: 1,
-      found: -1,
-      page: 1,
-      init: true,
-      organizations: [],
     }
   },
-  created() {
-    if (process.browser) {
-      this.getCategories();
+  async fetch({store}) {
+    await store.dispatch('organization/menu');
+  },
+  computed: {
+    menu() {
+      return this.$store.state.organization.menu;
+    },
+    found() {
+      return this.$store.state.organization.found;
+    },
+    organizations() {
+      return this.$store.state.organization.organizations;
+    },
+    city() {
+      return this.$store.state.localStorage.city.id;
     }
   },
   mounted() {
@@ -133,10 +137,15 @@ export default {
   },
   methods: {
     selectedValue: function(key) {
-      this.init   =   true;
-      this.page   =   1;
-      this.status =   true;
+      this.$store.commit('organization/init');
       this.selected.index = key;
+      this.getCountOrganizationsByCategoryId();
+      this.getOrganizationsByCategoryId();
+    },
+    filterUpdate: function(data) {
+      this.result =   false;
+      this.$store.commit('organization/init');
+      this.filters =   data;
       this.getCountOrganizationsByCategoryId();
       this.getOrganizationsByCategoryId();
     },
@@ -144,100 +153,28 @@ export default {
       let self    =   this;
       window.document.body.onscroll = function() {
         let height = Math.max(window.pageYOffset, document.documentElement.scrollTop, document.body.scrollTop) + window.innerHeight;
-        if ((document.documentElement.offsetHeight - height) < 800) {
+        if ((document.documentElement.offsetHeight - height) < 1000) {
           self.getOrganizationsByCategoryId();
         }
       }
     },
     getCountOrganizationsByCategoryId: function() {
-      this.$repository.home.getCountOrganizationsByCategoryId(this.city,this.page,this.filters).then(response => {
-        this.found  = response;
-      });
+      this.$store.dispatch('organization/getCountOrganizationsByCategoryId',{
+        city: this.city,
+        page: this.$store.state.organization.page,
+        filters: this.filters
+      })
     },
     getOrganizationsByCategoryId: function() {
-      if (!this.result && this.status) {
-        this.status =   false;
+      if (!this.result && this.$store.state.organization.status) {
+        this.$store.commit('organization/setStatus',false);
         this.filters.sort    =   this.selected.index;
-        this.$repository.home.getOrganizationsByCategoryId(this.city,this.page,this.filters).then(response => {
-          for (let i = 0; i < response.length; i++) {
-            response[i].timeTitle   =   this.getTime(response[i]);
-          }
-          if (this.init) {
-            this.init   =   false;
-            this.organizations  =   response;
-          } else {
-            this.organizations  =   this.organizations.concat(response);
-          }
-          this.Loading  =   false;
-          this.page++;
-          if (response.length === 15) {
-            this.status =   true;
-          }
+        this.$store.dispatch('organization/getOrganizationsByCategoryId', {
+          city: this.city,
+          page: this.$store.state.organization.page,
+          filters: this.filters
         });
       }
-    },
-    filterUpdate: function(data) {
-      this.result =   false;
-      this.status =   true;
-      this.page   =   1;
-      this.found  =   -1;
-      this.organizations  =   [];
-      this.filters =   data;
-      this.getCountOrganizationsByCategoryId();
-      this.getOrganizationsByCategoryId();
-    },
-    setCity: function() {
-      if (this.$store.state.localStorage.city) {
-        this.city = this.$store.state.localStorage.city.id;
-      }
-    },
-    getCategories: function () {
-      this.setCity();
-      this.$repository.home.list().then(response => {
-        this.menu = response;
-        this.Loading  = false;
-      });
-    },
-    favorite: function(id) {
-      let status  =   true;
-      for (let i = 0; i < this.$store.state.localStorage.favorite.length; i++) {
-        if (this.$store.state.localStorage.favorite[i] === id) {
-          this.$store.commit('localStorage/spliceFavorite',i);
-          status  =   false;
-        }
-      }
-      if (status) {
-        this.$store.commit('localStorage/addFavorite',id);
-      }
-    },
-    getTime: function(organization) {
-      let today   =   new Date();
-      today       =   new Date(today.getFullYear(),today.getMonth(),today.getDate());
-      let weekDay =   today.getDay();
-      let week;
-      if (weekDay === 0) {
-        week    =   organization.sunday;
-      } else if (weekDay === 1) {
-        week    =   organization.monday;
-      } else if (weekDay === 2) {
-        week    =   organization.tuesday;
-      } else if (weekDay === 3) {
-        week    =   organization.wednesday;
-      } else if (weekDay === 4) {
-        week    =   organization.thursday;
-      } else if (weekDay === 5) {
-        week    =   organization.friday;
-      } else if (weekDay === 6) {
-        week    =   organization.saturday;
-      }
-      if (week.start === week.end) {
-        return 'круглосуточно';
-      }
-      return 'c '+this.timeConvert(week.start)+' до '+this.timeConvert(week.end);
-    },
-    timeConvert: function(time) {
-      let converted   =   time.split(':');
-      return converted[0]+':'+converted[1];
     },
   }
 }

@@ -46,3 +46,23 @@ export const mutations = {
     state.modal = value;
   }
 }
+
+export const actions = {
+  favorite({commit},id) {
+    /*
+    favorite: function(id) {
+      alert(id);
+      let status  =   true;
+      for (let i = 0; i < this.$store.state.localStorage.favorite.length; i++) {
+        if (this.$store.state.localStorage.favorite[i] === id) {
+          this.$store.commit('localStorage/spliceFavorite',i);
+          status  =   false;
+        }
+      }
+      if (status) {
+        this.$store.commit('localStorage/addFavorite',id);
+      }
+    },
+     */
+  }
+}

@@ -139,26 +139,10 @@ export default {
                 });
             } else if (this.subscribe.status === 'on') {
                 this.subscribe.status   =   'off';
-                this.$axios.post(this.url+'/api/newsSubscribe/update/'+this.subscribe.id,{
-                    organization_id: this.organization.id,
-                    user_id: this.user.id,
-                    status: 'off'
-                },{
-                  headers: {
-                    'Content-Type': 'application/json'
-                  }
-                });
+                this.$repository.organization.update(this.subscribe.id,this.organization.id,this.user.id,'off');
             } else {
                 this.subscribe.status   =   'on';
-                this.$axios.post(this.url+'/api/newsSubscribe/update/'+this.subscribe.id,{
-                    organization_id: this.organization.id,
-                    user_id: this.user.id,
-                    status: 'on'
-                },{
-                  headers: {
-                    'Content-Type': 'application/json'
-                  }
-                });
+                this.$repository.organization.update(this.subscribe.id,this.organization.id,this.user.id,'on');
             }
         },
         setUser: async function () {

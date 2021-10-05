@@ -1,13 +1,14 @@
 export const state = () => ({
   user: false,
-  countries: []
+  countries: [],
+  menus: []
 })
-
 export const mutations = {
-  setCountries(state,value) {
+  setCountries(state, value)
+  {
     state.countries = value;
   },
-  setUser(state,value) {
-    state.user  = value;
+  setUser(state, value) {
+    state.user = value;
   }
 }

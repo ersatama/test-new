@@ -66,9 +66,9 @@ export default {
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
   env: {
-    baseUrl: 'https://reserved-app.kz'
+    baseUrl: 'http://staging-moyka-app.dev.reserved-app.kz'
   },
   axios: {
-    baseURL: 'https://reserved-app.kz',
+    baseURL: 'http://staging-moyka-app.dev.reserved-app.kz',
   }
 }

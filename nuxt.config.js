@@ -44,7 +44,8 @@ export default {
       { src: '~/plugins/vue-easy-lightbox.js', mode: 'client' , ssr: false},
       { src: '~/plugins/vue3-perfect-scrollbar.js', mode: 'client' , ssr: false},
       { src: '~/plugins/vue-snip.js', mode: 'client', ssr: false},
-      { src: '~/plugins/repository.js', mode: 'client'}
+      { src: '~/plugins/repository.js', mode: 'client'},
+      { src: '~/plugins/helper.js', mode: 'client'}
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

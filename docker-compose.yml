@@ -13,5 +13,7 @@ services:
 #        - BASE_URL=${MARKET_LB_BASE_URL}
 #        - PORT=${MARKET_LB_PORT}
     restart: unless-stopped
+    ports:
+      - 3000:3000
     command:
       "npm run start"

@@ -46,18 +46,13 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-<<<<<<< HEAD
-      { src: '~/plugins/vue-easy-lightbox.js', mode: 'client' , ssr: false},
-      { src: '~/plugins/vue3-perfect-scrollbar.js', mode: 'client' , ssr: false},
-      { src: '~/plugins/vue-snip.js', mode: 'client', ssr: false},
-      { src: '~/plugins/repository.js', mode: 'client'},
-      { src: '~/plugins/helper.js', mode: 'client'}
-=======
+
     {src: '~/plugins/vue-easy-lightbox.js', mode: 'client', ssr: false},
     {src: '~/plugins/vue3-perfect-scrollbar.js', mode: 'client', ssr: false},
     {src: '~/plugins/vue-snip.js', mode: 'client', ssr: false},
-    {src: '~/plugins/repository.js', mode: 'client'}
->>>>>>> 36f003066effd5ceefe31729d015aefb4c2512a3
+    {src: '~/plugins/repository.js', mode: 'client'},
+    { src: '~/plugins/helper.js', mode: 'client'}
+
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

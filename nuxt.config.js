@@ -69,6 +69,6 @@ export default {
     baseUrl: 'http://staging-moyka-app.dev.reserved-app.kz'
   },
   axios: {
-    baseURL: 'http://staging-moyka-app.dev.reserved-app.kz',
+    baseURL: 'http://staging-reserved-app.dev.reserved-app.kz',
   }
 }

@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+
+  moyka-web:
+    container_name: moyka-web
+    hostname: moyka-web
+    build:
+      context: ./
+      dockerfile: Dockerfile
+#      args:
+#        - BASE_URL_API=${API_UZ_URL}
+#        - BASE_URL=${MARKET_LB_BASE_URL}
+#        - PORT=${MARKET_LB_PORT}
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    command:
+      "npm run start"

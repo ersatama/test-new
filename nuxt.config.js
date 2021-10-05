@@ -1,21 +1,27 @@
 export default {
   // Target: https://go.nuxtjs.dev/config-target
-  target: 'static',
-  ssr: false,
+  target: 'server',
+  ssr: true,
+
+  server: {
+    port: 3000, // default: 3000
+    host: '0.0.0.0', // default: localhost,
+    timing: false
+  },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'moyka',
     htmlAttrs: {
-      lang: 'en'
+      lang: 'ru'
     },
     meta: [
-      { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' },
-      { name: 'format-detection', content: 'telephone=no' }
+      {charset: 'utf-8'},
+      {name: 'viewport', content: 'width=device-width, initial-scale=1'},
+      {hid: 'description', name: 'description', content: ''},
+      {name: 'format-detection', content: 'telephone=no'}
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'}
     ],
     script: [
       {
@@ -36,33 +42,37 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [
-  ],
+  css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+<<<<<<< HEAD
       { src: '~/plugins/vue-easy-lightbox.js', mode: 'client' , ssr: false},
       { src: '~/plugins/vue3-perfect-scrollbar.js', mode: 'client' , ssr: false},
       { src: '~/plugins/vue-snip.js', mode: 'client', ssr: false},
       { src: '~/plugins/repository.js', mode: 'client'},
       { src: '~/plugins/helper.js', mode: 'client'}
+=======
+    {src: '~/plugins/vue-easy-lightbox.js', mode: 'client', ssr: false},
+    {src: '~/plugins/vue3-perfect-scrollbar.js', mode: 'client', ssr: false},
+    {src: '~/plugins/vue-snip.js', mode: 'client', ssr: false},
+    {src: '~/plugins/repository.js', mode: 'client'}
+>>>>>>> 36f003066effd5ceefe31729d015aefb4c2512a3
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
-  buildModules: [
-  ],
+  buildModules: [],
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/bootstrap
-    'bootstrap-vue/nuxt','nuxt-vuex-localstorage','@nuxtjs/axios',
+    'bootstrap-vue/nuxt', 'nuxt-vuex-localstorage', '@nuxtjs/axios',
   ],
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {
-  },
+  build: {},
   env: {
     baseUrl: 'https://reserved-app.kz'
   },

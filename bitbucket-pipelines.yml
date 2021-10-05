@@ -1,0 +1,14 @@
+pipelines:
+  branches:
+    development:
+      - step:
+          name: 'Deployment to Staging'
+          deployment: staging
+          script:
+            - pipe: atlassian/ssh-run:0.2.8
+              variables:
+                SSH_USER: '$STAGING_LOGIN'
+                MODE: 'command'
+                SERVER: '$STAGING_HOST'
+                SSH_KEY: '$STAGING_SSH'
+                COMMAND: 'cd ~/www/reserved-carwash-front/ && git pull && docker-compose up -d --build'

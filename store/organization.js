@@ -3,7 +3,12 @@ export const state = () => ({
   menu: [],
   found: -1,
   page: 1,
-  organizations: []
+  organizations: [],
+  sort: [{title:'По рейтингу'},{title:'Сначала дорогие'},{title:'Сначала дешевые'}],
+  selected: {
+    index: 0,
+    show: false,
+  },
 })
 export const mutations = {
   setMenu(state,value) {
@@ -24,6 +29,10 @@ export const mutations = {
   init(state) {
     state.page  = 1;
     state.status  = true;
+    state.organizations = [];
+  },
+  selected(state,value) {
+    state.selected  = value;
   }
 }
 export const actions = {
@@ -46,20 +55,23 @@ export const actions = {
     }
   },
   async getOrganizationsByCategoryId({commit, state},payload) {
-    const res = await this.$repository.organization.getOrganizationsByCategoryId(payload.city,payload.page,payload.filters);
-    const { status, data } = res
-    if (status === 200) {
-      let len = data.data.length;
-      for (let i = 0; i < len; i++) {
-        data.data[i].timeTitle  = this.$helper(data.data[i]);
+    if (state.status) {
+      commit('setStatus',false);
+      const res = await this.$repository.organization.getOrganizationsByCategoryId(payload.city,payload.page,payload.filters);
+      const { status, data } = res
+      if (status === 200) {
+        let len = data.data.length;
+        for (let i = 0; i < len; i++) {
+          data.data[i].timeTitle  = this.$helper(data.data[i]);
+        }
+        if (len === 15) {
+          commit('setStatus',true);
+        }
+        commit('setPage',state.page + 1);
+        commit('setOrganizations',data.data);
+      } else {
+        commit('setOrganizations',[]);
       }
-      if (len === 15) {
-        commit('setStatus',true);
-      }
-      commit('setPage',state.page + 1);
-      commit('setOrganizations',data.data);
-    } else {
-      commit('setOrganizations',[]);
     }
   },
 }

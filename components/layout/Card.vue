@@ -9,10 +9,10 @@
             <div class="result-body-item-logo">
                 <img :src="organization.image" width="60">
             </div>
-            <div class="result-body-item-favorite" @click="favorite(organization.id)">
+            <div class="result-body-item-favorite" @click="$store.dispatch('localStorage/favorite',organization.id)">
                 <div :class="{'result-body-item-favorite-sel': $store.state.localStorage.favorite.includes(organization.id)}"></div>
             </div>
-            <template v-if="user">
+            <template v-if="$store.state.sessionStorage.user">
                 <div class="result-body-item-subscribe" v-if="subscribe && subscribe.status === 'on'" @click="subscribeNow()">
                     <div class="result-body-item-subscribe-sel"></div>
                 </div>
@@ -24,7 +24,7 @@
                 <div></div>
             </div>
             <a :href="'/home/'+organization.category_id.slug+'/'+organization.id" class="p-0 result-body-item-name-link">
-                <div class="result-body-item-name">{{organization.title}}</div>
+                <div class="result-body-item-name" v-snip="1">{{organization.title}}</div>
             </a>
             <div class="result-body-item-stars">
                 <div class="result-body-item-star" :class="{'result-body-item-star-sel':(organization.rating >= 0.5)}"></div>
@@ -57,15 +57,13 @@ export default {
     name: "Card",
     data() {
         return {
-            url: 'https://reserved-app.kz',
             subscribe: false,
-            user: false
         }
     },
-    created() {
-        this.setUser();
-    },
-    methods: {
+  mounted() {
+    this.getSubscribe();
+  },
+  methods: {
         subscribeNow: function() {
             if (!this.subscribe) {
                 this.$axios.post('/api/newsSubscribe/create').then(response => {
@@ -85,40 +83,6 @@ export default {
                     user_id: this.user.id,
                     status: 'on'
                 });
-            }
-        },
-        setUser: async function () {
-            if (this.$store.state.localStorage.token) {
-                let user    =   this.$store.state.sessionStorage.user;
-                if (user) {
-                    this.status = true;
-                    this.user = user;
-                } else {
-                    await this.$axios.get('/api/token/' + this.$store.state.localStorage.token)
-                        .then(response => {
-                            let data = response.data;
-                            if (data.hasOwnProperty('data')) {
-                                this.$store.commit('sessionStorage/setUser',data.data);
-                                this.status = true;
-                                this.user = this.$store.state.sessionStorage.user;
-                            }
-                        }).catch(error => {
-                            this.status = false;
-                        });
-                }
-                this.getSubscribe();
-            }
-        },
-        favorite: function(id) {
-            let status  =   true;
-            for (let i = 0; i < this.$store.state.localStorage.favorite.length; i++) {
-                if (this.$store.state.localStorage.favorite[i] === id) {
-                    this.$store.commit('localStorage/spliceFavorite',i);
-                    status  =   false;
-                }
-            }
-            if (status) {
-                this.$store.commit('localStorage/addFavorite',id);
             }
         },
         getSubscribe: function() {

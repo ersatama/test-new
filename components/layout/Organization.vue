@@ -1,6 +1,6 @@
 <template>
     <div>
-      <loading v-if="Loading"></loading>
+      <loading v-if="organizations.length === 0"></loading>
       <div class="container-fluid py-3 py-md-4 item-bg" v-else-if="category">
         <div class="container">
           <div class="row">
@@ -11,9 +11,12 @@
                   <div class="result-body-header-sort">
                     <div class="result-body-header-sort-title">Сортировка:</div>
                     <div class="result-body-header-sort-dropdown">
-                      <div class="result-body-header-sort-dropdown-title" @click="selected.show = !selected.show">{{ sort[selected.index].title }}</div>
+                      <div class="result-body-header-sort-dropdown-title" @click="$store.commit('organization/selected',{
+                        index: selected.index,
+                        show: !selected.show
+                      })">{{ sort[selected.index].title }}</div>
                       <div class="result-body-header-sort-dropdown-list" :class="{'result-body-header-sort-dropdown-list-open':selected.show}">
-                        <div class="result-body-header-sort-dropdown-list-item" v-for="(item,key) in sort" :key="key" @click=" selectedValue(key); ; selected.show = false">{{item.title}}</div>
+                        <div class="result-body-header-sort-dropdown-list-item" v-for="(item,key) in sort" :key="key" @click="sel(key)">{{item.title}}</div>
                       </div>
                     </div>
                   </div>
@@ -44,17 +47,12 @@ export default {
     },
     data() {
         return  {
-            url: 'https://reserved-app.kz',
             NotFound: {
                 img: '/img/logo/reserved.png',
                 title: 'Не найдено',
                 description: 'Возможно категория которую вы искали называется иначе.'
             },
-            selected: {
-                index: 0,
-                show: false,
-            },
-            filter: {
+            filters: {
                 price: {
                     status: false,
                     min: 0,
@@ -67,22 +65,27 @@ export default {
                 },
                 tags: [],
             },
-            sort: [{title:'По рейтингу'},{title:'Сначала дорогие'},{title:'Сначала дешевые'}],
             Loading: true,
-            status: true,
-            city: 1,
-            found: -1,
-            page: 1,
-            init: true,
-            organizations: [],
         }
     },
     created() {
         if (process.browser) {
-          this.setFilter();
-          this.getCountOrganizationsByCategoryId();
-          this.getOrganizationsByCategoryId();
+          this.selectedValue();
         }
+    },
+    computed: {
+      found() {
+        return this.$store.state.organization.found;
+      },
+      organizations() {
+        return this.$store.state.organization.organizations;
+      },
+      sort() {
+        return this.$store.state.organization.sort;
+      },
+      selected() {
+        return this.$store.state.organization.selected;
+      }
     },
     mounted() {
         if (process.browser) {
@@ -90,110 +93,47 @@ export default {
         }
     },
     methods: {
+        sel: function(key) {
+            this.$store.commit('organization/selected',{
+              index: key,
+              show: false
+            });
+            this.selectedValue();
+        },
         scrollEvent: function() {
             let self    =   this;
             window.document.body.onscroll = function() {
                 let height = Math.max(window.pageYOffset, document.documentElement.scrollTop, document.body.scrollTop) + window.innerHeight;
-                if ((document.documentElement.offsetHeight - height) < 800) {
+                if ((document.documentElement.offsetHeight - height) < 1000) {
                     self.getOrganizationsByCategoryId();
                 }
             }
         },
-        selectedValue: function(key) {
-            this.init   =   true;
-            this.page   =   1;
-            this.status =   true;
-            this.selected.index = key;
+        selectedValue: function() {
+            this.$store.commit('organization/init');
             this.getCountOrganizationsByCategoryId();
             this.getOrganizationsByCategoryId();
         },
         filterUpdate: function(data) {
-            this.init   =   true;
-            this.page   =   1;
-            this.status =   true;
-            this.filter =   data;
+          this.filters =   data;
+          this.$store.commit('organization/init');
+          this.getCountOrganizationsByCategoryId();
+          this.getOrganizationsByCategoryId();
         },
         getCountOrganizationsByCategoryId: function() {
-            this.$axios.post(this.url+'/api/category/count/organization/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
-                .then(response => {
-                    this.found  =   response.data;
-                }).catch(error => {
-                    this.found  =   -1;
-                });
+          this.$store.dispatch('organization/getCountOrganizationsByCategoryId',{
+            city: this.$store.state.localStorage.city.id,
+            page: this.$store.state.organization.page,
+            filters: this.filters
+          })
         },
         getOrganizationsByCategoryId: function() {
-            if (this.category && this.status) {
-                this.status =   false;
-                this.filter.sort    =   this.selected.index;
-                this.$axios.post(this.url+'/api/category/filter/organization/'+this.category.id+'/'+this.city+'/'+this.page,this.filter)
-                    .then(response => {
-                        let data    =   response.data.data;
-                        for (let i = 0; i < data.length; i++) {
-                            data[i].timeTitle   =   this.getTime(data[i]);
-                        }
-                        if (this.init) {
-                            this.init   =   false;
-                            this.organizations  =   data;
-                        } else {
-                            this.organizations  =   this.organizations.concat(data);
-                        }
-                        this.Loading        =   false;
-                        this.page++;
-                        if (data.length === 15) {
-                            this.status         =   true;
-                        }
-                    }).catch(error => {
-                        this.Loading    =   false;
-                        this.status     =   true;
-                    });
-            }
-        },
-        setFilter: function() {
-            if (this.$store.state.localStorage.city) {
-                this.city =   this.$store.state.localStorage.city.id;
-            }
-        },
-        favorite: function(id) {
-            let len =   this.$store.state.localStorage.favorite.length;
-            let status  =   true;
-            for (let i = 0; i < len; i++) {
-                if (this.$store.state.localStorage.favorite[i] === id) {
-                    this.$store.commit('localStorage/spliceFavorite',i);
-                    status  =   false;
-                }
-            }
-            if (status) {
-              this.$store.state.localStorage.favorite.push(id);
-            }
-        },
-        getTime: function(organization) {
-            let today   =   new Date();
-            today       =   new Date(today.getFullYear(),today.getMonth(),today.getDate());
-            let weekDay =   today.getDay();
-            let week;
-            if (weekDay === 0) {
-                week    =   organization.sunday;
-            } else if (weekDay === 1) {
-                week    =   organization.monday;
-            } else if (weekDay === 2) {
-                week    =   organization.tuesday;
-            } else if (weekDay === 3) {
-                week    =   organization.wednesday;
-            } else if (weekDay === 4) {
-                week    =   organization.thursday;
-            } else if (weekDay === 5) {
-                week    =   organization.friday;
-            } else if (weekDay === 6) {
-                week    =   organization.saturday;
-            }
-            if (week.start === week.end) {
-                return 'круглосуточно';
-            }
-            return 'c '+this.timeConvert(week.start)+' до '+this.timeConvert(week.end);
-        },
-        timeConvert: function(time) {
-            let converted   =   time.split(':');
-            return converted[0]+':'+converted[1];
+          this.filters.sort    =   this.selected.index;
+          this.$store.dispatch('organization/getOrganizationsByCategoryId', {
+            city: this.$store.state.localStorage.city.id,
+            page: this.$store.state.organization.page,
+            filters: this.filters
+          });
         },
     }
 }

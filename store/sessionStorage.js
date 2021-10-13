@@ -12,3 +12,8 @@ export const mutations = {
     state.user = value;
   }
 }
+export const actions = {
+  getUserByToken({commit,state}, payload) {
+    console.log(payload);
+  }
+}

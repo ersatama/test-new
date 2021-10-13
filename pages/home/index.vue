@@ -4,7 +4,7 @@
     <profile-section></profile-section>
     <Search @filterUpdate="filterUpdate"></Search>
     <loading v-if="!menu"></loading>
-    <div class="container-fluid p-0 m-0 home-bg-color" v-else-if="result && menu.length">
+    <div class="container-fluid p-0 m-0 home-bg-color" v-else-if="organizations.length === 0">
       <div class="container p-0">
         <div class="row home-main">
           <div class="col-12 col-md-6 d-flex justify-content-center p-0" v-for="(item,key) in menu" :key="key">
@@ -35,20 +35,23 @@
         </div>
       </div>
     </div>
-    <div class="container-fluid py-3 py-md-4 item-bg" v-else-if="!result && organizations.length > 0">
+    <div class="container-fluid py-3 py-md-4 item-bg" v-else-if="organizations.length > 0">
       <div class="container p-0">
         <div class="row">
           <div class="result">
             <div class="result-body">
               <div class="result-body-header">
-                <div class="result-body-header-return" @click="result = true">Категорий</div>
+                <div class="result-body-header-return" @click="$store.commit('organization/init')">Категорий</div>
                 <div class="result-body-header-count" v-if="found >= 0">Найдено заведении <span>{{found}}</span></div>
                 <div class="result-body-header-sort">
                   <div class="result-body-header-sort-title">Сортировка:</div>
                   <div class="result-body-header-sort-dropdown">
-                    <div class="result-body-header-sort-dropdown-title" @click="selected.show = !selected.show">{{ sort[selected.index].title }}</div>
+                    <div class="result-body-header-sort-dropdown-title" @click="$store.commit('organization/selected',{
+                        index: selected.index,
+                        show: !selected.show
+                      })">{{ sort[selected.index].title }}</div>
                     <div class="result-body-header-sort-dropdown-list" :class="{'result-body-header-sort-dropdown-list-open':selected.show}">
-                      <div class="result-body-header-sort-dropdown-list-item" v-for="(item,key) in sort" :key="key" @click=" selectedValue(key); ; selected.show = false">{{item.title}}</div>
+                      <div class="result-body-header-sort-dropdown-list-item" v-for="(item,key) in sort" :key="key" @click="sel(key)">{{item.title}}</div>
                     </div>
                   </div>
                 </div>
@@ -92,7 +95,6 @@ export default {
         title: 'Список пуст',
         description: 'Не найдено.'
       },
-      sort: [{title:'По рейтингу'},{title:'Сначала дорогие'},{title:'Сначала дешевые'}],
       filters: {
         price: {
           status: false,
@@ -105,11 +107,6 @@ export default {
           max: 0,
         },
         tags: [],
-      },
-      result: true,
-      selected: {
-        index: 0,
-        show: false,
       },
     }
   },
@@ -126,8 +123,11 @@ export default {
     organizations() {
       return this.$store.state.organization.organizations;
     },
-    city() {
-      return this.$store.state.localStorage.city.id;
+    sort() {
+      return this.$store.state.organization.sort;
+    },
+    selected() {
+      return this.$store.state.organization.selected;
     }
   },
   mounted() {
@@ -136,14 +136,19 @@ export default {
     }
   },
   methods: {
-    selectedValue: function(key) {
+    sel: function(key) {
+      this.$store.commit('organization/selected',{
+        index: key,
+        show: false
+      });
+      this.selectedValue();
+    },
+    selectedValue: function() {
       this.$store.commit('organization/init');
-      this.selected.index = key;
       this.getCountOrganizationsByCategoryId();
       this.getOrganizationsByCategoryId();
     },
     filterUpdate: function(data) {
-      this.result =   false;
       this.$store.commit('organization/init');
       this.filters =   data;
       this.getCountOrganizationsByCategoryId();
@@ -160,21 +165,18 @@ export default {
     },
     getCountOrganizationsByCategoryId: function() {
       this.$store.dispatch('organization/getCountOrganizationsByCategoryId',{
-        city: this.city,
+        city: this.$store.state.localStorage.city.id,
         page: this.$store.state.organization.page,
         filters: this.filters
       })
     },
     getOrganizationsByCategoryId: function() {
-      if (!this.result && this.$store.state.organization.status) {
-        this.$store.commit('organization/setStatus',false);
-        this.filters.sort    =   this.selected.index;
-        this.$store.dispatch('organization/getOrganizationsByCategoryId', {
-          city: this.city,
-          page: this.$store.state.organization.page,
-          filters: this.filters
-        });
-      }
+      this.filters.sort    =   this.selected.index;
+      this.$store.dispatch('organization/getOrganizationsByCategoryId', {
+        city: this.$store.state.localStorage.city.id,
+        page: this.$store.state.organization.page,
+        filters: this.filters
+      });
     },
   }
 }

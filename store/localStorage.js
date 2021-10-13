@@ -1,6 +1,6 @@
 export const state = () => ({
-  token: '',
-  user: '',
+  token: false,
+  user: false,
   auth: true,
   modal: false,
   favorite: [],
@@ -48,21 +48,25 @@ export const mutations = {
 }
 
 export const actions = {
-  favorite({commit},id) {
-    /*
-    favorite: function(id) {
-      alert(id);
-      let status  =   true;
-      for (let i = 0; i < this.$store.state.localStorage.favorite.length; i++) {
-        if (this.$store.state.localStorage.favorite[i] === id) {
-          this.$store.commit('localStorage/spliceFavorite',i);
-          status  =   false;
-        }
+  favorite({commit, state},id) {
+    let status  =   true;
+    for (let i = 0; i < state.favorite.length; i++) {
+      if (state.favorite[i] === id) {
+        commit('spliceFavorite',i);
+        status  =   false;
       }
-      if (status) {
-        this.$store.commit('localStorage/addFavorite',id);
+    }
+    if (status) {
+      commit('addFavorite',id);
+    }
+  },
+  getUser({commit, state}) {
+    console.log(this.$store.state.sessionStorage.user);
+    console.log('asdasd');
+    /*if (!state.user) {
+      if (state.token) {
+
       }
-    },
-     */
+    }*/
   }
 }

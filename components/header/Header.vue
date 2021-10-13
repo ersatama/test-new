@@ -278,8 +278,8 @@ export default {
                 this.countries = this.$store.state.sessionStorage.countries;
                 if (this.$store.state.localStorage.city === '') {
                     this.$store.commit('localStorage/setCity',this.countries[0].city_id[0]);
+                    $('#location').modal('toggle');
                 }
-                $('#location').modal('toggle');
             }
         },
         view: function(index) {

@@ -20,21 +20,16 @@ export default {
         ProfileSection,
         Organization,
     },
-    data() {
-        return {
-            category: false,
-        }
+    async fetch({store, route}) {
+      await store.dispatch('category/getCategoryBySlug',{
+        slug: route.params.category
+      });
     },
-    created() {
-        this.getCategoryBySlug();
+    computed: {
+      category() {
+        return this.$store.state.category.category;
+      }
     },
-    methods: {
-        getCategoryBySlug: function() {
-            this.$repository.category.getCategoryBySlug(this.$route.params.category).then(response => {
-                this.category = response;
-            });
-        },
-    }
 }
 </script>
 

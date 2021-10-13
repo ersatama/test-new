@@ -73,5 +73,6 @@ export default {
   },
   axios: {
     baseURL: 'https://reserved-app.kz',
+    credentials: false
   }
 }
